@@ -157,9 +157,9 @@ int main(int argc, char** argv) {
 
         PRINT_INFO(p.verbosity >= 1, "Processing current frontier for level %u", level);
 
-	#if ENERGY
-	DPU_ASSERT(dpu_probe_start(&probe));
-	#endif
+        #if ENERGY
+        DPU_ASSERT(dpu_probe_start(&probe));
+        #endif
         // Run all DPUs
         PRINT_INFO(p.verbosity >= 1, "    Booting DPUs");
         startTimer(&timer);
@@ -167,12 +167,12 @@ int main(int argc, char** argv) {
         stopTimer(&timer);
         dpuTime += getElapsedTime(timer);
         PRINT_INFO(p.verbosity >= 2, "    Level DPU Time: %f ms", getElapsedTime(timer)*1e3);
-	#if ENERGY
-    	DPU_ASSERT(dpu_probe_stop(&probe));
-    	double energy;
-    	DPU_ASSERT(dpu_probe_get(&probe, DPU_ENERGY, DPU_AVERAGE, &energy));
-	tenergy += energy;
-	#endif
+        #if ENERGY
+            DPU_ASSERT(dpu_probe_stop(&probe));
+            double energy;
+            DPU_ASSERT(dpu_probe_get(&probe, DPU_ENERGY, DPU_AVERAGE, &energy));
+        tenergy += energy;
+        #endif
 
 
 
@@ -187,6 +187,7 @@ int main(int argc, char** argv) {
                 } else {
                     copyFromDPU(dpu, dpuParams[dpuIdx].dpuNextFrontier_m, (uint8_t*)nextFrontier, numNodes/64*sizeof(uint64_t));
                     for(uint32_t i = 0; i < numNodes/64; ++i) {
+                        // here it merges the result from the current DPU and previous DPU
                         currentFrontier[i] |= nextFrontier[i];
                     }
                 }

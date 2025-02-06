@@ -87,19 +87,26 @@ int main(int argc, char** argv) {
     PRINT_INFO(p.verbosity >= 1, "Elapsed time: %f ms", getElapsedTime(timer)*1e3);
 
     // Calculating result on CPU sequentially
+
     PRINT_INFO(p.verbosity >= 1, "Calculating result on CPU (sequential)");
     startTimer(&timer);
     nodeLevelRef[srcNode] = 0;
+    // STEP 1. set [to visit] node list (first level) to contains node 0
     prevFrontier[0] = srcNode;
+    // number of node to visit in previous level is 1
     numPrevFrontier = 1;
+    // STEP 2. loop started at level 1, until there is no node left to visit after last level
     for(uint32_t level = 1; numPrevFrontier > 0; ++level) {
 
+        // number of node to visit in the current level
         uint32_t numCurrFrontier = 0;
 
-        // Visit nodes in the previous frontier
+        // STEP 3. Visit nodes in the previous frontier
         for(uint32_t i = 0; i < numPrevFrontier; ++i) {
             uint32_t node = prevFrontier[i];
+            // for each node
             for(uint32_t edge = csrGraph.nodePtrs[node]; edge < csrGraph.nodePtrs[node + 1]; ++edge) {
+                // get its each neighbor
                 uint32_t neighbor = csrGraph.neighborIdxs[edge];
                 uint32_t justVisited = 0;
                 if(nodeLevelRef[neighbor] == UINT32_MAX) { // Node not previously visited
@@ -107,6 +114,7 @@ int main(int argc, char** argv) {
                     justVisited = 1;
                 }
                 if(justVisited) {
+                    // add the neighbor to current level
                     uint32_t currFrontierIdx;
                     currFrontierIdx = numCurrFrontier++;
                     currFrontier[currFrontierIdx] = neighbor;
@@ -115,6 +123,8 @@ int main(int argc, char** argv) {
         }
 
         // Swap buffers
+        // STEP 4. All neighbor visited, 
+        //              current frontier assigned to previous frontiner to drive the loop
         uint32_t* tmp = prevFrontier;
         prevFrontier = currFrontier;
         currFrontier = tmp;
